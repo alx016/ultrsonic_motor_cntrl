@@ -10,11 +10,14 @@ int eco = 9;
 //Variables
 const int interruptPin = 2;
 int DutyCycle = 250;
+
 int error;
+
 int dur;
 int dis;
 bool direc[2] = {LOW,HIGH};
-int wanted_dis = 150; //mm
+int wanted_dis; //mm
+char buffer[6];
 
 void setup() {
   pinMode(Pin_1A,OUTPUT);
@@ -24,16 +27,28 @@ void setup() {
   pinMode(trig, OUTPUT);
   pinMode(eco , INPUT);
   Serial.begin(9600);
+  Serial.print("Indique la distancia deseada: ");
 }
 
 void loop() {
-  
+  int index;  
+  while (Serial.available()) {
+    index = Serial.readBytesUntil('\n', buffer, 5);  //newline or max of 5 chars
+    buffer[index] = '\0';
+    //Serial.print(buffer);  //so you can see the captured String 
+    wanted_dis = atoi(buffer);  //convert readString into a number
+    buffer[0] = '\0';
+    
+  }
   digitalWrite(trig, HIGH);
   delay(500);
   digitalWrite(trig,LOW);
   dur = pulseIn(eco, HIGH);
   dis = dur / 5.82 ; //mm distance
+  Serial.print("Distance: ");
   Serial.println(dis);
+  Serial.print("Wanted Distance: ");
+  Serial.println(wanted_dis);
   delay(500);
   
   error = wanted_dis - dis;
@@ -65,4 +80,8 @@ bool mov_mot( bool direc[2]){
   analogWrite(Pin_EN, DutyCycle);
   return true;
 }
+
+
+
+
 
